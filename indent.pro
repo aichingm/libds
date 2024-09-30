@@ -1,5 +1,7 @@
 # line length
 -l100
+# tabs
+--no-tabs
 # lines breaks
 --blank-lines-after-procedures
 --no-space-after-casts

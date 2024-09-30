@@ -245,32 +245,32 @@ void list_push(list_t* l, listitem_t* i) {
     i->list_ptr = l;
 
     if (l->length == 0) {
-	l->first = i;
-	l->last = i;
+        l->first = i;
+        l->last = i;
     } else {
-	i->prev = l->last;
-	l->last->next = i;
-	l->last = i;
+        i->prev = l->last;
+        l->last->next = i;
+        l->last = i;
     }
     l->length++;
 }
 
 listitem_t* list_pop(list_t* l) {
     if (l->length == 0) {
-	return NULL;
+        return NULL;
     }
 
     listitem_t* i = l->last;
 
     // clean up list
     if (l->length == 1) {
-	l->first = NULL;
-	l->last = NULL;
-	l->length = 0;
+        l->first = NULL;
+        l->last = NULL;
+        l->length = 0;
     } else {
-	l->last = i->prev;
-	i->prev->next = NULL;
-	l->length--;
+        l->last = i->prev;
+        i->prev->next = NULL;
+        l->length--;
     }
 
     // cleanup item
@@ -288,32 +288,32 @@ void list_unshift(list_t* l, listitem_t* i) {
     i->list_ptr = l;
 
     if (l->length == 0) {
-	l->first = i;
-	l->last = i;
+        l->first = i;
+        l->last = i;
     } else {
-	l->first->prev = i;
-	i->next = l->first;
-	l->first = i;
+        l->first->prev = i;
+        i->next = l->first;
+        l->first = i;
     }
     l->length++;
 }
 
 listitem_t* list_shift(list_t* l) {
     if (l->length == 0) {
-	return NULL;
+        return NULL;
     }
 
     listitem_t* i = l->first;
 
     // clean up list
     if (l->length == 1) {
-	l->first = NULL;
-	l->last = NULL;
-	l->length = 0;
+        l->first = NULL;
+        l->last = NULL;
+        l->length = 0;
     } else {
-	l->first = i->next;
-	i->next->prev = NULL;
-	l->length--;
+        l->first = i->next;
+        i->next->prev = NULL;
+        l->length--;
     }
 
     // cleanup item
@@ -331,10 +331,10 @@ listitem_t* list_get(list_t* l, LIST_LENGTH_TYPE index) {
 
     LIST_LENGTH_TYPE idx = 0;
     LIST_ITER(elem, l->first) {
-	if (idx == index) {
-	    return elem;
-	}
-	idx++;
+        if (idx == index) {
+            return elem;
+        }
+        idx++;
     }
     return NULL;
 }
@@ -342,7 +342,7 @@ listitem_t* list_get(list_t* l, LIST_LENGTH_TYPE index) {
 listitem_t* list_remove_index(list_t* l, LIST_LENGTH_TYPE index) {
     listitem_t* i = list_get(l, index);
     if (i == NULL) {
-	return NULL;
+        return NULL;
     }
 
     listitem_unlink(i);
@@ -355,27 +355,27 @@ bool list_contains(list_t* l, listitem_t* i) {
 
 void list_foreach(list_t* l, void (*iter)(listitem_t* , void* ), void* userdata) {
     LIST_ITER(elem, l->first) {
-	iter(elem, userdata);
+        iter(elem, userdata);
     }
 }
 
 void list_foreach_reverse(list_t* l, void (*iter)(listitem_t* , void* ), void* userdata) {
     LIST_ITER_REVERSE(elem, l->last) {
-	iter(elem, userdata);
+        iter(elem, userdata);
     }
 }
 
 void list_to_array(list_t* l, listitem_t** array) {
     LIST_LENGTH_TYPE i = 0;
     LIST_ITER(elem, l->first) {
-	array[i++] = elem;
+        array[i++] = elem;
     }
 }
 
 void list_data_to_array(list_t* l, void** array, size_t offset) {
     LIST_LENGTH_TYPE i = 0;
     LIST_ITER(elem, l->first) {
-	array[i++] = (void *)(((char *)elem) - ((char *)offset));
+        array[i++] = (void *)(((char *)elem) - ((char *)offset));
     }
 }
 
@@ -396,19 +396,19 @@ void listitem_unlink(listitem_t* i) {
     list_t* l = i->list_ptr;
 
     if (l->first == i) {
-	l->first = i->next;
+        l->first = i->next;
     }
 
     if (l->last == i) {
-	l->last = i->prev;
+        l->last = i->prev;
     }
 
     if (i->prev != NULL) {
-	i->prev->next = i->next;
+        i->prev->next = i->next;
     }
 
     if (i->next != NULL) {
-	i->next->prev = i->prev;
+        i->next->prev = i->prev;
     }
 
     l->length--;
