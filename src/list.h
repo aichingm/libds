@@ -65,7 +65,7 @@ You should have received a copy of the GNU Affero General Public License along w
 /**
  * Type to the indices and lengths.
  */
-#define LIST_LEN_TYPE unsigned int
+#define LIST_LENGTH_TYPE unsigned int
 
 // Remove an item from the end of the list and return a pointer to the struct holding the item.
 #define LIST_POP_s(type, list, property_name) ((list)->last != NULL ? LISTITEM_AS_s(type, list_pop(list), property_name): NULL)
@@ -80,7 +80,7 @@ You should have received a copy of the GNU Affero General Public License along w
 #define LIST_SHIFT(type, list) LIST_SHIFT_s(type, list, default_list_item_name)
 
 // Get the nth item list and return a pointer to the struct holding the item.
-#define LIST_GET_s(type, list, index, property_name) ((list_len(list) > index && index >= 0) ? LISTITEM_AS_s(type, list_get(list, index), property_name) : NULL)
+#define LIST_GET_s(type, list, index, property_name) ((list_length(list) > index && index >= 0) ? LISTITEM_AS_s(type, list_get(list, index), property_name) : NULL)
 
 // Get the nth item list and return a pointer to the struct holding the item using the default item property name.
 #define LIST_GET(type, list, index) LIST_GET_s(type, list, index, default_list_item_name)
@@ -134,7 +134,7 @@ typedef struct listitem_s {
 typedef struct {
     listitem_t* first;
     listitem_t* last;
-    LIST_LEN_TYPE length;
+    LIST_LENGTH_TYPE length;
 } list_t;
 
 /**
@@ -155,7 +155,7 @@ void list_init(list_t* l);
 /**
  * Returns the number of items in the list.
  */
-LIST_LEN_TYPE list_len(list_t* l);
+LIST_LENGTH_TYPE list_length(list_t* l);
 
 /**
  * Add an item to the end of the list.
@@ -180,12 +180,12 @@ listitem_t* list_shift(list_t* l);
 /**
  * Get the nth item in the list.
  */
-listitem_t* list_get(list_t* l, LIST_LEN_TYPE i);
+listitem_t* list_get(list_t* l, LIST_LENGTH_TYPE i);
 
 /**
  * Remove the item at the given index, return the item or NULL if the index points outside the list.
  */
-listitem_t* list_remove_index(list_t* l, LIST_LEN_TYPE index);
+listitem_t* list_remove_index(list_t* l, LIST_LENGTH_TYPE index);
 
 /**
  * Check if the list contains a given item. Runtime O(n).
@@ -234,7 +234,7 @@ void list_init(list_t* l) {
     l->last = NULL;
 }
 
-LIST_LEN_TYPE list_len(list_t* l) {
+LIST_LENGTH_TYPE list_length(list_t* l) {
     return l->length;
 }
 
@@ -324,12 +324,12 @@ listitem_t* list_shift(list_t* l) {
     return i;
 }
 
-listitem_t* list_get(list_t* l, LIST_LEN_TYPE index) {
-    if (index >= list_len(l)) {
-	return NULL;
+listitem_t* list_get(list_t* l, LIST_LENGTH_TYPE index) {
+    if (index >= list_length(l)) {
+        return NULL;
     }
 
-    LIST_LEN_TYPE idx = 0;
+    LIST_LENGTH_TYPE idx = 0;
     LIST_ITER(elem, l->first) {
 	if (idx == index) {
 	    return elem;
@@ -339,7 +339,7 @@ listitem_t* list_get(list_t* l, LIST_LEN_TYPE index) {
     return NULL;
 }
 
-listitem_t* list_remove_index(list_t* l, LIST_LEN_TYPE index) {
+listitem_t* list_remove_index(list_t* l, LIST_LENGTH_TYPE index) {
     listitem_t* i = list_get(l, index);
     if (i == NULL) {
 	return NULL;
@@ -366,14 +366,14 @@ void list_foreach_reverse(list_t* l, void (*iter)(listitem_t* , void* ), void* u
 }
 
 void list_to_array(list_t* l, listitem_t** array) {
-    LIST_LEN_TYPE i = 0;
+    LIST_LENGTH_TYPE i = 0;
     LIST_ITER(elem, l->first) {
 	array[i++] = elem;
     }
 }
 
 void list_data_to_array(list_t* l, void** array, size_t offset) {
-    LIST_LEN_TYPE i = 0;
+    LIST_LENGTH_TYPE i = 0;
     LIST_ITER(elem, l->first) {
 	array[i++] = (void *)(((char *)elem) - ((char *)offset));
     }

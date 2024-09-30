@@ -3,7 +3,7 @@
 #include "src/list.h"
 
 #define LIST_TESTS \
-    { "list length", test_list_len }, \
+    { "list length", test_list_length }, \
     { "list push", test_list_push }, \
     { "list pop", test_list_pop }, \
     { "list unshift", test_list_unshift }, \
@@ -57,17 +57,17 @@ typedef struct {
       LISTITEM_PROP_s(named);
 } push_variants_t;
 
-void test_list_len() {
+void test_list_length() {
     explicit_item_t ZERO(a), ZERO(b), ZERO(c);
     list_t ZERO(l);
 
-    TEST_ASSERT(list_len(&l) == 0);
+    TEST_ASSERT(list_length(&l) == 0);
     list_push(&l, &a.item);
-    TEST_ASSERT(list_len(&l) == 1);
+    TEST_ASSERT(list_length(&l) == 1);
     list_push(&l, &b.item);
-    TEST_ASSERT(list_len(&l) == 2);
+    TEST_ASSERT(list_length(&l) == 2);
     list_push(&l, &c.item);
-    TEST_ASSERT(list_len(&l) == 3);
+    TEST_ASSERT(list_length(&l) == 3);
 
 }
 
@@ -78,28 +78,28 @@ void test_list_pop() {
     TEST_ASSERT(list_pop(&l) == NULL);
 
     list_push(&l, &a.item);
-    TEST_ASSERT(list_len(&l) == 1);
+    TEST_ASSERT(list_length(&l) == 1);
 
     TEST_ASSERT(list_pop(&l) == &a.item);
-    TEST_ASSERT(list_len(&l) == 0);
+    TEST_ASSERT(list_length(&l) == 0);
 
     list_push(&l, &a.item);
     list_push(&l, &b.item);
-    TEST_ASSERT(list_len(&l) == 2);
+    TEST_ASSERT(list_length(&l) == 2);
 
     TEST_ASSERT(list_pop(&l) == &b.item);
     TEST_ASSERT(list_pop(&l) == &a.item);
-    TEST_ASSERT(list_len(&l) == 0);
+    TEST_ASSERT(list_length(&l) == 0);
 
     list_push(&l, &a.item);
     list_push(&l, &b.item);
     list_push(&l, &c.item);
-    TEST_ASSERT(list_len(&l) == 3);
+    TEST_ASSERT(list_length(&l) == 3);
 
     TEST_ASSERT(list_pop(&l) == &c.item);
     TEST_ASSERT(list_pop(&l) == &b.item);
     TEST_ASSERT(list_pop(&l) == &a.item);
-    TEST_ASSERT(list_len(&l) == 0);
+    TEST_ASSERT(list_length(&l) == 0);
 
 }
 
@@ -113,7 +113,7 @@ void test_list_push(void) {
     list_push(&l, LISTITEM_OF(push_variants_t, &a));
     list_push(&l, LISTITEM_OF_s(push_variants_t, &a, named));
 
-    TEST_CHECK(list_len(&l) == 3);
+    TEST_CHECK(list_length(&l) == 3);
 
     TEST_ASSERT(list_pop(&l) == LISTITEM_OF_s(push_variants_t, &a, named));
     TEST_ASSERT(list_pop(&l) == LISTITEM_OF(push_variants_t, &a));
@@ -338,12 +338,12 @@ void test_list_remove_index() {
 
     TEST_ASSERT(list_remove_index(&l, 5) == NULL);
 
-    TEST_ASSERT(list_remove_index(&l, 0) == LISTITEM_OF(item_t, &a));	// remove start
-    TEST_ASSERT(list_remove_index(&l, 0) == LISTITEM_OF(item_t, &b));	// remove new start
-    TEST_ASSERT(list_remove_index(&l, 1) == LISTITEM_OF(item_t, &d));	// remove middle
-    TEST_ASSERT(list_remove_index(&l, 1) == LISTITEM_OF(item_t, &f));	// remove end
-    TEST_ASSERT(list_remove_index(&l, 0) == LISTITEM_OF(item_t, &c));	// remove last
-    TEST_ASSERT(list_len(&l) == 0);
+    TEST_ASSERT(list_remove_index(&l, 0) == LISTITEM_OF(item_t, &a));   // remove start
+    TEST_ASSERT(list_remove_index(&l, 0) == LISTITEM_OF(item_t, &b));   // remove new start
+    TEST_ASSERT(list_remove_index(&l, 1) == LISTITEM_OF(item_t, &d));   // remove middle
+    TEST_ASSERT(list_remove_index(&l, 1) == LISTITEM_OF(item_t, &f));   // remove end
+    TEST_ASSERT(list_remove_index(&l, 0) == LISTITEM_OF(item_t, &c));   // remove last
+    TEST_ASSERT(list_length(&l) == 0);
 
 }
 
@@ -465,7 +465,7 @@ void test_listitem_unlink() {
     listitem_unlink(LISTITEM_OF(item_t, &b));
     TEST_ASSERT(!list_contains(&l, LISTITEM_OF(item_t, &b)));
 
-    TEST_ASSERT(list_len(&l) == 2);
+    TEST_ASSERT(list_length(&l) == 2);
 
 }
 
