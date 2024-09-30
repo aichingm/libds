@@ -1,3 +1,4 @@
+
 /*
 
 # List
@@ -23,7 +24,7 @@ After that include list.h like a normal header everywhere the declarations are n
 typedef struct {
     char name[32];
     double complex sex;
-    LISTITEM()
+    LISTITEM_PROP()
 } person;
 
 void main() {
@@ -31,15 +32,17 @@ void main() {
     list_init(&people);
 
     person alex = {0}, riley = {0};
-    
+
     alex.name = "Alex";
     alex.sex = 1.0 + 3.0 * I;
 
     riley.name = "Riley";
     riley.sex = 4.0 + 2.0 * I;
-    
+
     list_push(&list LISTITEM_OF(person*, &alex));
     list_push(&list LISTITEM_OF(person*, &alex));
+
+    person* p0 = LIST_GET(person, &l, 0);
 }
 ```
 
@@ -55,8 +58,6 @@ You should have received a copy of the GNU Affero General Public License along w
 
 */
 
-// TODO remove al *_item functions ust use LISTITEM_AS everywhere a listitem needs to be converted
-
 #ifndef DS_LIST_H
 #define DS_LIST_H
 #include <stddef.h>
@@ -66,60 +67,70 @@ You should have received a copy of the GNU Affero General Public License along w
  */
 #define LIST_LEN_TYPE unsigned int
 
+// Remove an item from the end of the list and return a pointer to the struct holding the item.
+#define LIST_POP_s(type, list, property_name) LISTITEM_AS_s(type, list_pop(list), property_name)
+
+// Remove an item from the end of the list and return a pointer to the struct holding the item using the default item property name.
+#define LIST_POP(type, list) LIST_POP_s(type, list, default_list_item_name)
+
+// Remove an item from the beginning of the list and return a pointer to the struct holding the item.
+#define LIST_SHIFT_s(type, list, property_name) LISTITEM_AS_s(type, list_shift(list), property_name)
+
+// Remove an item from the beginning of the list and return a pointer to the struct holding the item using the default item property name.
+#define LIST_SHIFT(type, list) LIST_SHIFT_s(type, list, default_list_item_name)
+
+// Get the nth item list and return a pointer to the struct holding the item.
+#define LIST_GET_s(type, list, index, property_name) LISTITEM_AS_s(type, list_get(list, index), property_name)
+
+// Get the nth item list and return a pointer to the struct holding the item using the default item property name.
+#define LIST_GET(type, list, index) LIST_GET_s(type, list, index, default_list_item_name)
+
 /**
- * Inject a listitem_t stuct with a given name into a struct.
+ * Inject a listitem_t property with a given name into a struct.
  */
 #define LISTITEM_PROP_s(item_name) listitem_t item_name
 
 /**
- * Convert a type + pointer + attribute name to a parameter list (pointer, offset).
+ * Inject a listitem_t struct with the default property name into a struct.
  */
-#define LISTITEM_OF_s(type, data_ptr, item_name) data_ptr, offsetof(type, item_name)
+#define LISTITEM_PROP() LISTITEM_PROP_s(default_list_item_name)
 
 /**
- * Inject a listitem_t struct with the default attribute name into a struct.
+ * Convert a type + pointer + property name to a list item.
  */
-#define LISTITEM_PROP() LISTITEM_s(default_list_item_name)
+#define LISTITEM_OF_s(type, data_ptr, item_name) (listitem_t*)(((char*)data_ptr) + offsetof(type, item_name))
 
 /**
- * Convert a type + pointer to a parameter list (pointer, offset) using the default attribute name.
+ * Convert a type + pointer to a list item using the default property name.
  */
 #define LISTITEM_OF(type, data_ptr) LISTITEM_OF_s(type, data_ptr, default_list_item_name)
 
 /**
- * Convert a type + pointer + name to a pointer to a listitem_t
+ * Convert a listitem_t to a pointer to its holding struct using the offset of the given property's name.
  */
-#define LISTITEM_PTR_s(type, data_ptr, item_name) (listitem_t*)(((char*) data_ptr) + offsetof(type, item_name))
-
-
-#define LISTITEM_AS(type, ptr) ((type*)(((char*) ptr) - ((char*) offsetof(type, default_list_item_name))))
 #define LISTITEM_AS_s(type, ptr, property_name) ((type*)(((char*) ptr) - ((char*) offsetof(type, property_name))))
 
 /**
- * Convert a type + pointer + offset to a pointer to a listitem_t.
+ * Convert a listitem_t to a pointer to its holding struct using the offset of the default property name.
  */
-#define LISTITEM_PTR(type, data_ptr) LISTITEM_PTR_s(type, data_ptr, default_list_item_name)
+#define LISTITEM_AS(type, ptr) LISTITEM_AS_s(type, ptr, default_list_item_name)
 
 /**
- * Convert a type + listitem_t to a pointer to userdefined struct.
+ * Calculate the offset of the default property name in bytes.
  */
-#define LISTITEM_TO_DATA(type, item) (type) (((char*)item) - ((char*)item->offset))
+#define LISTITEM_OFFSET(type) LISTITEM_OFFSET_s(type, default_list_item_name)
 
-// TODO 
 /**
- * A struct 
+ * Calculate the offset of a given property name in bytes.
  */
+#define LISTITEM_OFFSET_s(type, property_name) offsetof(type, property_name)
+
 typedef struct listitem_s {
-    unsigned char state;
-    size_t offset;
     void* list_ptr;
     struct listitem_s* prev;
     struct listitem_s* next;
 } listitem_t;
 
-/**
- * A struct which holds a list of items.
- */
 typedef struct {
     listitem_t* first;
     listitem_t* last;
@@ -129,12 +140,12 @@ typedef struct {
 /**
  * Iterate over the items of a list.
  */
-#define LIST_ITER_ITEM(iter_name, begin) for(listitem_t* iter_name = begin; iter_name != NULL; iter_name = iter_name->next)
+#define LIST_ITER(iter_name, begin) for(listitem_t* iter_name = begin; iter_name != NULL; iter_name = iter_name->next)
 
 /**
  * Iterate in reverse order over the items of a list.
  */
-#define LIST_ITER_REVERSE_ITEM(iter_name, begin) for(listitem_t* iter_name = begin; iter_name != NULL; iter_name = iter_name->prev)
+#define LIST_ITER_REVERSE(iter_name, begin) for(listitem_t* iter_name = begin; iter_name != NULL; iter_name = iter_name->prev)
 
 /**
  * Initialize a list.
@@ -149,117 +160,67 @@ LIST_LEN_TYPE list_len(list_t* l);
 /**
  * Add an item to the end of the list.
  */
-void list_push(list_t* l, void* data, size_t offset);
+void list_push(list_t* l, listitem_t* i);
 
 /**
- * Add an item to the end of the list.
+ * Remove an item from the end of the list and return it.
  */
-void list_push_item(list_t* l, listitem_t* i);
-
-/**
- * Remove an item from the end of the list.
- */
-void* list_pop(list_t* l);
+listitem_t* list_pop(list_t* l);
 
 /**
  * Add an item to the beginning of the list.
  */
-void list_unshift(list_t* l, void* data, size_t offset);
+void list_unshift(list_t* l, listitem_t* i);
 
 /**
- * Add an item to the beginning of the list.
+ * Remove an item from the beginning of the list and return it.
  */
-void list_unshift_item(list_t* l, listitem_t* i);
-
-/**
- * Remove an item from the beginning of the list.
- */
-void* list_shift(list_t* l);
+listitem_t* list_shift(list_t* l);
 
 /**
  * Get the nth item in the list.
  */
-void* list_get(list_t* l, LIST_LEN_TYPE i);
+listitem_t* list_get(list_t* l, LIST_LEN_TYPE i);
 
 /**
- * Get the nth item in the list.
+ * Remove the item at the given index, return the item or NULL if the index points outside the list.
  */
-listitem_t* list_get_item(list_t* l, LIST_LEN_TYPE i);
+listitem_t* list_remove_index(list_t* l, LIST_LEN_TYPE index);
 
 /**
- * Remove the nth item from the list and return the associated data.
+ * Check if the list contains a given item. Runtime O(n).
  */
-void* list_remove_index(list_t* l, LIST_LEN_TYPE i);
+bool list_contains(list_t* l, listitem_t* i);
 
 /**
- * Check if the list contains a given item.
+ * Iterate over the items in the list by calling the iter function with every item. Runtime O(n)
  */
-bool list_contains(list_t* l, void* data, size_t offset);
+void list_foreach(list_t* l, void (*iter)(listitem_t* , void* ), void* userdata);
 
 /**
- * Check if the list contains a given item.
+ * Iterate, in reverse order, over the items in the list by calling the iter function with every item. Runtime O(n).
  */
-bool list_contains_item(list_t* l, listitem_t* i);
+void list_foreach_revere(list_t* l, void (*iter)(listitem_t* , void* ), void* userdata);
 
 /**
- * Check if the list contains a given data pointer.
+ * Write all item pointers contained in the list to a caller managed array. Runtime O(n).
  */
-bool list_contains_data(list_t* l, void* data);
+void list_to_array(list_t* l, listitem_t** array);
 
 /**
- * Iterate over the data in the list by calling the iter function with every data pointer.
+ * Write all data pointers contained in the list to a caller managed array. Runtime O(n).
  */
-void list_foreach(list_t* l, void (*iter)(void* , void* ), void* userdata);
+void list_data_to_array(list_t* l, void** array, size_t ptr_offset);
 
 /**
- * Iterate over the items in the list by calling the iter function with every item.
+ * Remove the item from the list it currently is contained in.
  */
-void list_foreach_item(list_t* l, void (*iter)(listitem_t* , void* ), void* userdata);
+void listitem_unlink(listitem_t* i);
 
 /**
- * Iterate, in reverse order, over the data in the list by calling the iter function with every data pointer.
+ * Check if the item is currently in a list.
  */
-void list_foreach_reverse(list_t* l, void (*iter)(void* , void* ), void* userdata);
-
-/**
- * Iterate, in reverse order, over the items in the list by calling the iter function with every item.
- */
-void list_foreach_revere_item(list_t* l, void (*iter)(listitem_t* , void* ), void* userdata);
-
-/**
- * Write all data pointers contained in the list to a caller managed array.
- */
-void list_to_array(list_t* l, void** array);
-
-/**
- * Initializte a listitem.
- */
-void listitem_init(void* data, size_t offset);
-
-/**
- * Set the offset for a given listitem.
- */
-void listitem_set_offset(listitem_t* data, size_t offset);
-
-/**
- * Check if the given listitem has an offset set.
- */
-bool listitem_has_offset(listitem_t* i);
-
-/**
- * Check if the given listitem is currently contained in a list.
- */
-bool listitem_used(listitem_t* i);
-
-/**
- * Remove the listitem from the list it currently is contained in.
- */
-void listitem_remove(void* data, size_t offset);
-
-/**
- * Remove the listitem from the list it currently is contained in.
- */
-void listitem_remove_item(listitem_t* i);
+bool listitem_in_list(listitem_t* i);
 
 #define IMPL_LIST
 #ifdef IMPL_LIST
@@ -277,16 +238,9 @@ LIST_LEN_TYPE list_len(list_t* l) {
     return l->length;
 }
 
-void list_push(list_t* l, void* data, size_t offset) {
-    listitem_t* i = (listitem_t *)(((char *)data) + offset);
-    listitem_set_offset(i, offset);
-    list_push_item(l, i);
-}
+void list_push(list_t* l, listitem_t* i) {
 
-void list_push_item(list_t* l, listitem_t* i) {
-
-    assert(listitem_has_offset(i) && "listitem_t: offset is set");
-    assert(!listitem_used(i) && "listitem_t: is not part of a list");
+    assert(!listitem_in_list(i));
 
     i->list_ptr = l;
 
@@ -301,13 +255,12 @@ void list_push_item(list_t* l, listitem_t* i) {
     l->length++;
 }
 
-void* list_pop(list_t* l) {
+listitem_t* list_pop(list_t* l) {
     if (l->length == 0) {
 	return NULL;
     }
 
     listitem_t* i = l->last;
-    void* data_ptr = LISTITEM_TO_DATA(void* , i);
 
     // clean up list
     if (l->length == 1) {
@@ -325,19 +278,12 @@ void* list_pop(list_t* l) {
     i->next = NULL;
     i->list_ptr = NULL;
 
-    return data_ptr;
+    return i;
 }
 
-void list_unshift(list_t* l, void* data, size_t offset) {
-    listitem_t* i = (listitem_t *)(((char *)data) + offset);
-    listitem_set_offset(i, offset);
-    list_unshift_item(l, i);
-}
+void list_unshift(list_t* l, listitem_t* i) {
 
-void list_unshift_item(list_t* l, listitem_t* i) {
-
-    assert(listitem_has_offset(i) && "listitem_t: offset not set");
-    assert(!listitem_used(i) && "listitem_t: part of a list (or not correctly initialized)");
+    assert(!listitem_in_list(i));
 
     i->list_ptr = l;
 
@@ -352,13 +298,12 @@ void list_unshift_item(list_t* l, listitem_t* i) {
     l->length++;
 }
 
-void* list_shift(list_t* l) {
+listitem_t* list_shift(list_t* l) {
     if (l->length == 0) {
 	return NULL;
     }
 
     listitem_t* i = l->first;
-    void* data_ptr = LISTITEM_TO_DATA(void* , i);
 
     // clean up list
     if (l->length == 1) {
@@ -376,24 +321,16 @@ void* list_shift(list_t* l) {
     i->next = NULL;
     i->list_ptr = NULL;
 
-    return data_ptr;
+    return i;
 }
 
-void* list_get(list_t* l, LIST_LEN_TYPE index) {
-    listitem_t* i = list_get_item(l, index);
-    if (i == NULL) {
-	return NULL;
-    }
-    return (void *)(((char *)i) - ((char *)i->offset));
-}
-
-listitem_t* list_get_item(list_t* l, LIST_LEN_TYPE index) {
+listitem_t* list_get(list_t* l, LIST_LEN_TYPE index) {
     if (index >= list_len(l)) {
 	return NULL;
     }
 
     LIST_LEN_TYPE idx = 0;
-    LIST_ITER_ITEM(elem, l->first) {
+    LIST_ITER(elem, l->first) {
 	if (idx == index) {
 	    return elem;
 	}
@@ -402,98 +339,59 @@ listitem_t* list_get_item(list_t* l, LIST_LEN_TYPE index) {
     return NULL;
 }
 
-void* list_remove_index(list_t* l, LIST_LEN_TYPE index) {
-    listitem_t* i = list_get_item(l, index);
+listitem_t* list_remove_index(list_t* l, LIST_LEN_TYPE index) {
+    listitem_t* i = list_get(l, index);
     if (i == NULL) {
 	return NULL;
     }
 
-    listitem_remove_item(i);
-    return LISTITEM_TO_DATA(void* , i);
+    listitem_unlink(i);
+    return i;
 }
 
-bool list_contains(list_t* l, void* data, size_t offset) {
-    listitem_t* i = (listitem_t *)(((char *)data) + offset);
-    return list_contains_item(l, i);
-}
-
-bool list_contains_item(list_t* l, listitem_t* i) {
+bool list_contains(list_t* l, listitem_t* i) {
     return i->list_ptr == l;
 }
 
-bool list_contains_data(list_t* l, void* data) {
-    LIST_ITER_ITEM(item, l->first) {
-	void* iter_data = LISTITEM_TO_DATA(void* , item);
-	if (iter_data == data) {
-	    return true;
-	}
-    }
-    return false;
-}
-
-void list_foreach(list_t* l, void (*iter)(void* , void* ), void* userdata) {
-    LIST_ITER_ITEM(item, l->first) {
-	void* data = LISTITEM_TO_DATA(void* , item);
-	iter(data, userdata);
-    }
-}
-
-void list_foreach_item(list_t* l, void (*iter)(listitem_t* , void* ), void* userdata) {
-    LIST_ITER_ITEM(elem, l->first) {
+void list_foreach(list_t* l, void (*iter)(listitem_t* , void* ), void* userdata) {
+    LIST_ITER(elem, l->first) {
 	iter(elem, userdata);
     }
 }
 
-void list_foreach_reverse(list_t* l, void (*iter)(void* , void* ), void* userdata) {
-    LIST_ITER_REVERSE_ITEM(item, l->last) {
-	void* data = LISTITEM_TO_DATA(void* , item);
-	iter(data, userdata);
-    }
-}
-
-void list_foreach_reverse_item(list_t* l, void (*iter)(listitem_t* , void* ), void* userdata) {
-    LIST_ITER_REVERSE_ITEM(elem, l->last) {
+void list_foreach_reverse(list_t* l, void (*iter)(listitem_t* , void* ), void* userdata) {
+    LIST_ITER_REVERSE(elem, l->last) {
 	iter(elem, userdata);
     }
 }
 
-void list_to_array(list_t* l, void** array) {
+void list_to_array(list_t* l, listitem_t** array) {
     LIST_LEN_TYPE i = 0;
-    LIST_ITER_ITEM(elem, l->first) {
-	array[i++] = (void *)(((char *)elem) - ((char *)elem->offset));
+    LIST_ITER(elem, l->first) {
+	array[i++] = elem;
     }
 }
 
-void listitem_init(void* data, size_t offset) {
-    listitem_t* i = (listitem_t *)(((char *)data) + offset);
-    listitem_set_offset(i, offset);
+void list_data_to_array(list_t* l, void** array, size_t offset) {
+    LIST_LEN_TYPE i = 0;
+    LIST_ITER(elem, l->first) {
+	array[i++] = (void *)(((char *)elem) - ((char *)offset));
+    }
+}
+
+void listitem_init(listitem_t* i) {
     i->list_ptr = NULL;
     i->prev = NULL;
     i->next = NULL;
 }
 
-void listitem_set_offset(listitem_t* i, size_t offset) {
-    i->offset = offset;
-    i->state |= LISTITEM_STATE_OFFSET_INITIALIZED;
-}
-
-bool listitem_has_offset(listitem_t* i) {
-    return i->state & LISTITEM_STATE_OFFSET_INITIALIZED;
-}
-
-bool listitem_used(listitem_t* i) {
+bool listitem_in_list(listitem_t* i) {
     return i->list_ptr != NULL;
 }
 
-void listitem_remove(void* data, size_t offset) {
-    listitem_t* i = (listitem_t *)(((char *)data) + offset);
-    listitem_remove_item(i);
-}
+void listitem_unlink(listitem_t* i) {
 
-void listitem_remove_item(listitem_t* i) {
-
-    assert(listitem_has_offset(i) && "listitem_t: offset not set");
-    assert(listitem_used(i) && "listitem_t' is not part of any list_t");
+    assert(listitem_in_list(i));
 
     list_t* l = i->list_ptr;
 
