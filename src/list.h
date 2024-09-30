@@ -233,17 +233,24 @@ bool listitem_in_list(listitem_t* i);
 #include <assert.h>
 
 void list_init(list_t* l) {
+
+    assert(l != NULL);
+
     l->length = 0;
     l->first = NULL;
     l->last = NULL;
 }
 
 LIST_LENGTH_TYPE list_length(list_t* l) {
+
+    assert(l != NULL);
+
     return l->length;
 }
 
 void list_push(list_t* l, listitem_t* i) {
 
+    assert(l != NULL);
     assert(!listitem_in_list(i));
 
     i->list_ptr = l;
@@ -260,6 +267,9 @@ void list_push(list_t* l, listitem_t* i) {
 }
 
 listitem_t* list_pop(list_t* l) {
+
+    assert(l != NULL);
+
     if (l->length == 0) {
         return NULL;
     }
@@ -287,6 +297,7 @@ listitem_t* list_pop(list_t* l) {
 
 void list_unshift(list_t* l, listitem_t* i) {
 
+    assert(l != NULL);
     assert(!listitem_in_list(i));
 
     i->list_ptr = l;
@@ -303,6 +314,9 @@ void list_unshift(list_t* l, listitem_t* i) {
 }
 
 listitem_t* list_shift(list_t* l) {
+
+    assert(l != NULL);
+
     if (l->length == 0) {
         return NULL;
     }
@@ -329,6 +343,9 @@ listitem_t* list_shift(list_t* l) {
 }
 
 listitem_t* list_get(list_t* l, LIST_LENGTH_TYPE index) {
+
+    assert(l != NULL);
+
     if (index >= list_length(l)) {
         return NULL;
     }
@@ -344,6 +361,9 @@ listitem_t* list_get(list_t* l, LIST_LENGTH_TYPE index) {
 }
 
 listitem_t* list_remove_index(list_t* l, LIST_LENGTH_TYPE index) {
+
+    assert(l != NULL);
+
     listitem_t* i = list_get(l, index);
     if (i == NULL) {
         return NULL;
@@ -358,18 +378,27 @@ bool list_contains(list_t* l, listitem_t* i) {
 }
 
 void list_foreach(list_t* l, void (*iter)(listitem_t* , void* ), void* userdata) {
+
+    assert(l != NULL);
+
     LIST_ITER(elem, l->first) {
         iter(elem, userdata);
     }
 }
 
 void list_foreach_reverse(list_t* l, void (*iter)(listitem_t* , void* ), void* userdata) {
+
+    assert(l != NULL);
+
     LIST_ITER_REVERSE(elem, l->last) {
         iter(elem, userdata);
     }
 }
 
 void list_to_array(list_t* l, listitem_t** array) {
+
+    assert(l != NULL);
+
     LIST_LENGTH_TYPE i = 0;
     LIST_ITER(elem, l->first) {
         array[i++] = elem;
@@ -377,6 +406,9 @@ void list_to_array(list_t* l, listitem_t** array) {
 }
 
 void list_data_to_array(list_t* l, void** array, size_t offset) {
+
+    assert(l != NULL);
+
     LIST_LENGTH_TYPE i = 0;
     LIST_ITER(elem, l->first) {
         array[i++] = (void *)(((char *)elem) - ((char *)offset));
