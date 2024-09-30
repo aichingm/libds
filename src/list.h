@@ -213,6 +213,11 @@ void list_to_array(list_t* l, listitem_t** array);
 void list_data_to_array(list_t* l, void** array, size_t ptr_offset);
 
 /**
+ * Initialize a list item.
+ */
+void listitem_init(listitem_t* i);
+
+/**
  * Remove the item from the list it currently is contained in.
  */
 void listitem_unlink(listitem_t* i);
