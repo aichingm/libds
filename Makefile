@@ -1,4 +1,4 @@
-.PHONY: default clean indent br cb cbr compile_commands.json
+.PHONY: default clean indent test compile_commands.json
 
 MAIN = bin/tests
 
@@ -40,12 +40,7 @@ clean:
 	rm -rf $(MAIN)
 	rm -rf $(OBJS)
 
-br: default
-	./$(MAIN)
-
-cb: clean default
-
-cbr: clean default
+test: default
 	./$(MAIN)
 
 compile_commands.json:
