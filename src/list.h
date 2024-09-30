@@ -68,19 +68,19 @@ You should have received a copy of the GNU Affero General Public License along w
 #define LIST_LEN_TYPE unsigned int
 
 // Remove an item from the end of the list and return a pointer to the struct holding the item.
-#define LIST_POP_s(type, list, property_name) LISTITEM_AS_s(type, list_pop(list), property_name)
+#define LIST_POP_s(type, list, property_name) ((list)->last != NULL ? LISTITEM_AS_s(type, list_pop(list), property_name): NULL)
 
 // Remove an item from the end of the list and return a pointer to the struct holding the item using the default item property name.
 #define LIST_POP(type, list) LIST_POP_s(type, list, default_list_item_name)
 
 // Remove an item from the beginning of the list and return a pointer to the struct holding the item.
-#define LIST_SHIFT_s(type, list, property_name) LISTITEM_AS_s(type, list_shift(list), property_name)
+#define LIST_SHIFT_s(type, list, property_name) ((list)->first != NULL ? LISTITEM_AS_s(type, list_shift(list), property_name) : NULL)
 
 // Remove an item from the beginning of the list and return a pointer to the struct holding the item using the default item property name.
 #define LIST_SHIFT(type, list) LIST_SHIFT_s(type, list, default_list_item_name)
 
 // Get the nth item list and return a pointer to the struct holding the item.
-#define LIST_GET_s(type, list, index, property_name) LISTITEM_AS_s(type, list_get(list, index), property_name)
+#define LIST_GET_s(type, list, index, property_name) ((list_len(list) > index && index >= 0) ? LISTITEM_AS_s(type, list_get(list, index), property_name) : NULL)
 
 // Get the nth item list and return a pointer to the struct holding the item using the default item property name.
 #define LIST_GET(type, list, index) LIST_GET_s(type, list, index, default_list_item_name)

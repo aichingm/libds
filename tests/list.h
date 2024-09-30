@@ -385,6 +385,17 @@ void test_list_macros() {
     list_t l;
     list_init(&l);
 
+    // test get operations on empty lists
+
+    x = LIST_POP(push_variants_t, &l);
+    TEST_ASSERT(x == NULL);
+
+    x = LIST_SHIFT(push_variants_t, &l);
+    TEST_ASSERT(x == NULL);
+
+    x = LIST_GET(push_variants_t, &l, 0);
+    TEST_ASSERT(x == NULL);
+
     // POP
     list_push(&l, LISTITEM_OF(push_variants_t, &a));
     list_push(&l, LISTITEM_OF_s(push_variants_t, &a, named));
