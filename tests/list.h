@@ -1,5 +1,6 @@
 #include "acutest.h"
 
+#define IMPL_LIST
 #include "src/list.h"
 
 #define LIST_TESTS \

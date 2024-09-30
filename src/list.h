@@ -222,8 +222,7 @@ void listitem_unlink(listitem_t* i);
  */
 bool listitem_in_list(listitem_t* i);
 
-#define IMPL_LIST
-#ifdef IMPL_LIST
+#if defined(IMPL_LIST) || defined(_CLANGD)
 
 #define LISTITEM_STATE_OFFSET_INITIALIZED 0b1
 #include <assert.h>
