@@ -183,6 +183,13 @@ listitem_t* list_pop(list_t* l);
 void list_unshift(list_t* l, listitem_t* i);
 
 /**
+ * Insert an item into the list at the first place where cmp returns true.
+ * cmp takes two items: i: the new item and j the item before which i might get inserted.
+ * If the list is empty the item will be inserted at index 0.
+ */
+void list_insert_sorted(list_t* l, listitem_t* i, bool (*cmp)(listitem_t* i, listitem_t* j));
+
+/**
  * Remove an item from the beginning of the list and return it.
  */
 listitem_t* list_shift(list_t* l);
@@ -316,6 +323,34 @@ void list_unshift(list_t* l, listitem_t* i) {
         l->first = i;
     }
     l->length++;
+}
+
+void list_insert_sorted(list_t* l, listitem_t* i, bool (*cmp)(listitem_t* i, listitem_t* j)) {
+    assert(l != NULL);
+    assert(!listitem_in_list(i));
+
+    listitem_t* curr = l->first;
+    while (curr != NULL) {
+        if (cmp(i, curr)) {
+            // if has prev update prev, else it must be the nre first
+            if (curr->prev != NULL) {
+                curr->prev->next = i;
+                i->prev = curr->prev;
+            } else {
+                l->first = i;
+            }
+
+            curr->prev = i;
+            i->next = curr;
+            i->list_ptr = l;
+            l->length++;
+            return;
+        }
+        curr = curr->next;
+    }
+
+    // add to the end
+    list_push(l, i);
 }
 
 listitem_t* list_shift(list_t* l) {

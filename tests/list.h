@@ -8,6 +8,7 @@
     { "list push", test_list_push }, \
     { "list pop", test_list_pop }, \
     { "list unshift", test_list_unshift }, \
+    { "list insert sorted", test_list_insert_sorted }, \
     { "list shift", test_list_shift }, \
     { "list get", test_list_get }, \
     { "list remove index", test_list_remove_index }, \
@@ -278,6 +279,86 @@ void test_list_unshift() {
     TEST_ASSERT(list_pop(&l) == LISTITEM_OF(item_t, &b));
     TEST_ASSERT(list_pop(&l) == LISTITEM_OF(item_t, &c));
     TEST_ASSERT(list_pop(&l) == LISTITEM_OF(item_t, &d));
+
+}
+
+bool cmp_int(listitem_t* i, listitem_t* j) {
+    item_t* a = LISTITEM_AS(item_t, i);
+    item_t* b = LISTITEM_AS(item_t, j);
+    return b->x > a->x;
+}
+
+void test_list_insert_sorted() {
+    item_t ZERO(a), ZERO(b), ZERO(c), ZERO(d);
+    a.x = 1;
+    b.x = 2;
+    c.x = 3;
+    d.x = 4;
+    list_t l;
+    list_init(&l);
+
+    list_insert_sorted(&l, LISTITEM_OF(item_t, &a), cmp_int);
+    list_insert_sorted(&l, LISTITEM_OF(item_t, &b), cmp_int);
+    list_insert_sorted(&l, LISTITEM_OF(item_t, &c), cmp_int);
+    list_insert_sorted(&l, LISTITEM_OF(item_t, &d), cmp_int);
+
+    TEST_ASSERT(l.first == LISTITEM_OF(item_t, &a));
+    TEST_ASSERT(l.first->next == LISTITEM_OF(item_t, &b));
+    TEST_ASSERT(l.first->next->next == LISTITEM_OF(item_t, &c));
+    TEST_ASSERT(l.first->next->next->next == LISTITEM_OF(item_t, &d));
+
+    TEST_ASSERT(l.last == LISTITEM_OF(item_t, &d));
+    TEST_ASSERT(l.last->prev == LISTITEM_OF(item_t, &c));
+    TEST_ASSERT(l.last->prev->prev == LISTITEM_OF(item_t, &b));
+    TEST_ASSERT(l.last->prev->prev->prev == LISTITEM_OF(item_t, &a));
+
+    TEST_ASSERT(list_pop(&l) == LISTITEM_OF(item_t, &d));
+    TEST_ASSERT(list_pop(&l) == LISTITEM_OF(item_t, &c));
+    TEST_ASSERT(list_pop(&l) == LISTITEM_OF(item_t, &b));
+    TEST_ASSERT(list_pop(&l) == LISTITEM_OF(item_t, &a));
+
+    list_insert_sorted(&l, LISTITEM_OF(item_t, &b), cmp_int);
+    list_insert_sorted(&l, LISTITEM_OF(item_t, &a), cmp_int);
+    list_insert_sorted(&l, LISTITEM_OF(item_t, &d), cmp_int);
+    list_insert_sorted(&l, LISTITEM_OF(item_t, &c), cmp_int);
+
+    TEST_ASSERT(l.first == LISTITEM_OF(item_t, &a));
+    TEST_ASSERT(l.first->next == LISTITEM_OF(item_t, &b));
+    TEST_ASSERT(l.first->next->next == LISTITEM_OF(item_t, &c));
+    TEST_ASSERT(l.first->next->next->next == LISTITEM_OF(item_t, &d));
+
+    TEST_ASSERT(l.last == LISTITEM_OF(item_t, &d));
+    TEST_ASSERT(l.last->prev == LISTITEM_OF(item_t, &c));
+    TEST_ASSERT(l.last->prev->prev == LISTITEM_OF(item_t, &b));
+    TEST_ASSERT(l.last->prev->prev->prev == LISTITEM_OF(item_t, &a));
+
+    TEST_ASSERT(list_pop(&l) == LISTITEM_OF(item_t, &d));
+    TEST_ASSERT(list_pop(&l) == LISTITEM_OF(item_t, &c));
+    TEST_ASSERT(list_pop(&l) == LISTITEM_OF(item_t, &b));
+    TEST_ASSERT(list_pop(&l) == LISTITEM_OF(item_t, &a));
+
+    b.x = 3;
+
+    list_insert_sorted(&l, LISTITEM_OF(item_t, &d), cmp_int);
+    list_insert_sorted(&l, LISTITEM_OF(item_t, &a), cmp_int);
+    list_insert_sorted(&l, LISTITEM_OF(item_t, &c), cmp_int);
+    list_insert_sorted(&l, LISTITEM_OF(item_t, &b), cmp_int);
+
+    TEST_ASSERT(l.first == LISTITEM_OF(item_t, &a));
+    TEST_ASSERT(l.first->next == LISTITEM_OF(item_t, &c));
+    TEST_ASSERT(l.first->next->next == LISTITEM_OF(item_t, &b));
+    TEST_ASSERT(l.first->next->next->next == LISTITEM_OF(item_t, &d));
+
+    TEST_ASSERT(l.last == LISTITEM_OF(item_t, &d));
+    TEST_ASSERT(l.last->prev == LISTITEM_OF(item_t, &b));
+    TEST_ASSERT(l.last->prev->prev == LISTITEM_OF(item_t, &c));
+    TEST_ASSERT(l.last->prev->prev->prev == LISTITEM_OF(item_t, &a));
+
+    TEST_ASSERT(list_pop(&l) == LISTITEM_OF(item_t, &d));
+    TEST_ASSERT(list_pop(&l) == LISTITEM_OF(item_t, &b));
+    TEST_ASSERT(list_pop(&l) == LISTITEM_OF(item_t, &c));
+    TEST_ASSERT(list_pop(&l) == LISTITEM_OF(item_t, &a));
+
 
 }
 
